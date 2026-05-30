@@ -1,0 +1,10 @@
+# Anthropic / Claude
+.claude/
+CLAUDE.md
+
+# OS
+.DS_Store
+
+# Specs descargados localmente (se generan con fetch_specs.sh)
+# Descomenta si NO quieres versionarlos:
+# openapi/*.json
