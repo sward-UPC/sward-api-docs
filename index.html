@@ -11,72 +11,171 @@
         margin: 0;
         padding: 0;
       }
+
+      /*
+       * Paleta tomada 1:1 de sward-frontend/src/styles/theme.css (.dark)
+       * mapeada a las variables CSS de Scalar para consistencia visual.
+       */
+      :root {
+        /* Texto */
+        --scalar-color-1: #f1f5f9;
+        --scalar-color-2: #94a3b8;
+        --scalar-color-3: #64748b;
+        --scalar-color-accent: #6366f1;
+
+        /* Fondos */
+        --scalar-background-1: #0f1117;
+        --scalar-background-2: #1a1d27;
+        --scalar-background-3: #252836;
+
+        /* Bordes */
+        --scalar-border-color: #2a2d3e;
+
+        /* Sidebar */
+        --scalar-sidebar-background-1: #1a1d27;
+        --scalar-sidebar-color-1: #f1f5f9;
+        --scalar-sidebar-color-2: #94a3b8;
+        --scalar-sidebar-color-accent: #6366f1;
+        --scalar-sidebar-border-color: #2a2d3e;
+
+        /* Botones */
+        --scalar-button-1: #6366f1;
+        --scalar-button-1-color: #ffffff;
+        --scalar-button-1-hover: #4f46e5;
+
+        /* HTTP method badges */
+        --scalar-color-green: #10b981;
+        --scalar-color-red: #ef4444;
+        --scalar-color-yellow: #f59e0b;
+        --scalar-color-blue: #3b82f6;
+        --scalar-color-orange: #f59e0b;
+        --scalar-color-purple: #8b5cf6;
+
+        /* Inputs */
+        --scalar-input-background: #1a1d27;
+        --scalar-input-border-color: #2a2d3e;
+        --scalar-input-color: #f1f5f9;
+
+        /* Border radius igual al frontend (--radius: 0.75rem) */
+        --scalar-border-radius: 0.75rem;
+        --scalar-border-radius-lg: 0.75rem;
+        --scalar-border-radius-xl: 1rem;
+      }
+
+      /* Scrollbar custom oscuro */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: #2a2d3e #0f1117;
+      }
+      *::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      *::-webkit-scrollbar-track {
+        background: #0f1117;
+      }
+      *::-webkit-scrollbar-thumb {
+        background-color: #2a2d3e;
+        border-radius: 3px;
+      }
+      *::-webkit-scrollbar-thumb:hover {
+        background-color: #6366f1;
+      }
+
+      /* Seleccion de texto en indigo */
+      ::selection {
+        background-color: #6366f133;
+        color: #f1f5f9;
+      }
     </style>
   </head>
   <body>
-    <!-- Contenedor donde Scalar monta el portal -->
     <div id="app"></div>
 
-    <!-- Componente Scalar via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
 
     <script>
-      /**
-       * Portal de documentacion unificado del sistema SWARD.
-       *
-       * Arquitectura:
-       *   Browser (GitHub Pages)
-       *     → GET https://cloudfront.net/api/v1/auth/openapi.json
-       *     → CloudFront Function: quita /api/v1 → /auth/openapi.json
-       *     → ALB enruta /auth* → ms-usuarios
-       *     → FastAPI sirve el schema (openapi_url="/auth/openapi.json")
-       *
-       * CORS: gestionado en CloudFront (ResponseHeadersPolicy).
-       * Los microservicios no necesitan configuracion CORS adicional.
-       *
-       * Gateway: https://d2z5yyv5sjm9sz.cloudfront.net
-       */
-
       const GATEWAY_BASE_URL = 'https://d2z5yyv5sjm9sz.cloudfront.net';
       const API_V1 = GATEWAY_BASE_URL + '/api/v1';
 
       Scalar.createApiReference('#app', {
         sources: [
           {
-            title: 'ms-usuarios (auth / users / admin)',
+            title: 'ms-usuarios — Auth / Users / Admin',
             slug: 'ms-usuarios',
             url: API_V1 + '/auth/openapi.json',
             default: true,
           },
           {
-            title: 'ms-integracion-lms (lms)',
+            title: 'ms-integracion-lms — LMS',
             slug: 'ms-integracion-lms',
             url: API_V1 + '/lms/openapi.json',
           },
           {
-            title: 'ms-trazabilidad (interactions / students / dashboard)',
+            title: 'ms-trazabilidad — Interactions / Students / Dashboard',
             slug: 'ms-trazabilidad',
             url: API_V1 + '/interactions/openapi.json',
           },
           {
-            title: 'ms-cursos-recursos (courses / resources)',
+            title: 'ms-cursos-recursos — Courses / Resources',
             slug: 'ms-cursos-recursos',
             url: API_V1 + '/courses/openapi.json',
           },
           {
-            title: 'ms-recomendacion (recommendations)',
+            title: 'ms-recomendacion — Recommendations',
             slug: 'ms-recomendacion',
             url: API_V1 + '/recommendations/openapi.json',
           },
           {
-            title: 'ms-xai (xai)',
+            title: 'ms-xai — Explainability (XAI)',
             slug: 'ms-xai',
             url: API_V1 + '/xai/openapi.json',
           },
         ],
-        theme: 'default',
+
+        theme: 'none',
         layout: 'modern',
+        darkMode: true,
+        defaultDarkMode: true,
+
+        /* Cmd+K para buscar endpoints */
+        searchHotKey: 'k',
+
+        /* Auth JWT preconfigurado — el usuario escribe el token una vez
+           y Scalar lo inyecta en todos los endpoints con Bearer. */
+        authentication: {
+          http: {
+            bearer: {
+              token: '',
+            },
+          },
+        },
+
+        /* Cliente por defecto: Python requests (coherente con el backend FastAPI).
+           Clientes visibles: solo los más usados para no saturar la UI. */
+        defaultHttpClient: {
+          targetKey: 'python',
+          clientKey: 'requests',
+        },
+        hiddenClients: [
+          'ruby',
+          'php',
+          'java',
+          'c',
+          'objc',
+          'swift',
+          'kotlin',
+          'r',
+          'ocaml',
+          'csharp',
+          'go',
+          'clojure',
+          'powershell',
+          'http',
+        ],
+
         hideDownloadButton: false,
+
         metaData: {
           title: 'SWARD API - Portal de Documentacion',
           description:
