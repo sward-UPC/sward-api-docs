@@ -24,76 +24,54 @@
       /**
        * Portal de documentacion unificado del sistema SWARD.
        *
-       * Cada microservicio expone su `openapi.json` (FastAPI). El portal
-       * agrega los 6 servicios usando la configuracion multi-fuente de Scalar
-       * (`sources`), de modo que el lector navega toda la API del sistema
-       * desde un solo lugar y cambia entre servicios con el selector superior.
+       * Arquitectura:
+       *   Browser (GitHub Pages)
+       *     → GET https://cloudfront.net/api/v1/auth/openapi.json
+       *     → CloudFront Function: quita /api/v1 → /auth/openapi.json
+       *     → ALB enruta /auth* → ms-usuarios
+       *     → FastAPI sirve el schema (openapi_url="/auth/openapi.json")
        *
-       * --------------------------------------------------------------------
-       * URL BASE DEL GATEWAY (ALB)
-       * --------------------------------------------------------------------
-       * El backend se accede por un Application Load Balancer unico que
-       * enruta por path hacia cada microservicio. El placeholder
-       * `__GATEWAY_BASE_URL__` se reemplaza en el deploy por el dominio real
-       * del ALB (ej. https://api.sward.example.com), sin barra final.
+       * CORS: gestionado en CloudFront (ResponseHeadersPolicy).
+       * Los microservicios no necesitan configuracion CORS adicional.
        *
-       * Reemplazo en deploy (ejemplo):
-       *   sed -i '' 's#__GATEWAY_BASE_URL__#https://api.sward.example.com#g' index.html
-       *
-       * --------------------------------------------------------------------
-       * DESARROLLO LOCAL (servicios FastAPI corriendo en localhost)
-       * --------------------------------------------------------------------
-       * Si corres los servicios en local, las URLs serian:
-       *   ms-usuarios          -> http://localhost:8001/openapi.json
-       *   ms-integracion-lms   -> http://localhost:8002/openapi.json
-       *   ms-trazabilidad      -> http://localhost:8003/openapi.json
-       *   ms-cursos-recursos   -> http://localhost:8004/openapi.json
-       *   ms-recomendacion     -> http://localhost:8005/openapi.json
-       *   ms-xai               -> http://localhost:8006/openapi.json
-       *
-       * NOTA SOBRE CORS: si apuntas a servicios remotos/locales en vivo, el
-       * navegador exige cabeceras CORS en cada servicio. Para hosting estatico
-       * (S3 / GitHub Pages) sin depender de CORS, usa `./fetch_specs.sh` para
-       * descargar los specs a `openapi/*.json` y cambia cada `url` de abajo a
-       * la ruta local correspondiente (ej. './openapi/ms-usuarios.json').
+       * Gateway: https://d2z5yyv5sjm9sz.cloudfront.net
        */
 
-      // URL base del gateway (ALB). Se reemplaza en el deploy.
-      const GATEWAY_BASE_URL = '__GATEWAY_BASE_URL__';
+      const GATEWAY_BASE_URL = 'https://d2z5yyv5sjm9sz.cloudfront.net';
+      const API_V1 = GATEWAY_BASE_URL + '/api/v1';
 
       Scalar.createApiReference('#app', {
-        // Multi-fuente: una entrada por microservicio del sistema SWARD.
         sources: [
           {
             title: 'ms-usuarios (auth / users / admin)',
             slug: 'ms-usuarios',
-            url: GATEWAY_BASE_URL + '/auth/openapi.json',
+            url: API_V1 + '/auth/openapi.json',
             default: true,
           },
           {
             title: 'ms-integracion-lms (lms)',
             slug: 'ms-integracion-lms',
-            url: GATEWAY_BASE_URL + '/lms/openapi.json',
+            url: API_V1 + '/lms/openapi.json',
           },
           {
             title: 'ms-trazabilidad (interactions / students / dashboard)',
             slug: 'ms-trazabilidad',
-            url: GATEWAY_BASE_URL + '/interactions/openapi.json',
+            url: API_V1 + '/interactions/openapi.json',
           },
           {
             title: 'ms-cursos-recursos (courses / resources)',
             slug: 'ms-cursos-recursos',
-            url: GATEWAY_BASE_URL + '/courses/openapi.json',
+            url: API_V1 + '/courses/openapi.json',
           },
           {
             title: 'ms-recomendacion (recommendations)',
             slug: 'ms-recomendacion',
-            url: GATEWAY_BASE_URL + '/recommendations/openapi.json',
+            url: API_V1 + '/recommendations/openapi.json',
           },
           {
             title: 'ms-xai (xai)',
             slug: 'ms-xai',
-            url: GATEWAY_BASE_URL + '/xai/openapi.json',
+            url: API_V1 + '/xai/openapi.json',
           },
         ],
         theme: 'default',
@@ -102,7 +80,7 @@
         metaData: {
           title: 'SWARD API - Portal de Documentacion',
           description:
-            'Documentacion unificada de los 6 microservicios del sistema SWARD detras del gateway (ALB).',
+            'Documentacion unificada de los 6 microservicios del sistema SWARD.',
         },
       });
     </script>
