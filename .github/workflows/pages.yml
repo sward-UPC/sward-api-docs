@@ -23,6 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Inyectar SWARD_API_URL en el portal
+        env:
+          SWARD_API_URL: ${{ secrets.SWARD_API_URL }}
+        run: |
+          # Usa el secret SWARD_API_URL (URL CloudFront del API, output del CDK).
+          # Fallback: la URL pública del API que usa el frontend.
+          URL="${SWARD_API_URL:-https://d11c2gdoarsvsa.cloudfront.net}"
+          URL="${URL%/}"
+          sed -i "s#__SWARD_API_URL__#${URL}#g" index.html
+          echo "Portal apuntando a: ${URL}"
+          grep -q "__SWARD_API_URL__" index.html && { echo "ERROR: placeholder sin reemplazar"; exit 1; } || true
+
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
 

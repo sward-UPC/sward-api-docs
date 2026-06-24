@@ -23,41 +23,49 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
     <script>
-      const GATEWAY_BASE_URL = 'https://d2z5yyv5sjm9sz.cloudfront.net';
-      const API_V1 = GATEWAY_BASE_URL + '/api/v1';
+      // URL del API inyectada en el deploy desde el secret SWARD_API_URL
+      // (ver .github/workflows/pages.yml). Si no se reemplaza (p.ej. apertura
+      // local del HTML), cae a la URL pública del API que usa el frontend
+      // (sward-frontend/.env → VITE_API_URL, producción).
+      const SWARD_API_URL = '__SWARD_API_URL__';
+      const API_BASE = (
+        SWARD_API_URL.startsWith('__')
+          ? 'https://d11c2gdoarsvsa.cloudfront.net'
+          : SWARD_API_URL
+      ).replace(/\/+$/, '');
 
       Scalar.createApiReference('#app', {
         sources: [
           {
             title: 'ms-usuarios — Auth / Users / Admin',
             slug: 'ms-usuarios',
-            url: API_V1 + '/auth/openapi.json',
+            url: API_BASE + '/auth/openapi.json',
             default: true,
           },
           {
             title: 'ms-integracion-lms — LMS',
             slug: 'ms-integracion-lms',
-            url: API_V1 + '/lms/openapi.json',
+            url: API_BASE + '/lms/openapi.json',
           },
           {
             title: 'ms-trazabilidad — Interactions / Students / Dashboard',
             slug: 'ms-trazabilidad',
-            url: API_V1 + '/interactions/openapi.json',
+            url: API_BASE + '/interactions/openapi.json',
           },
           {
             title: 'ms-cursos-recursos — Courses / Resources',
             slug: 'ms-cursos-recursos',
-            url: API_V1 + '/courses/openapi.json',
+            url: API_BASE + '/courses/openapi.json',
           },
           {
             title: 'ms-recomendacion — Recommendations',
             slug: 'ms-recomendacion',
-            url: API_V1 + '/recommendations/openapi.json',
+            url: API_BASE + '/recommendations/openapi.json',
           },
           {
             title: 'ms-xai — Explainability (XAI)',
             slug: 'ms-xai',
-            url: API_V1 + '/xai/openapi.json',
+            url: API_BASE + '/xai/openapi.json',
           },
         ],
 
